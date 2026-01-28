@@ -23,16 +23,18 @@ export interface InputDataRead {
 
 export interface OutputDataRead {
     name: string;
-    fraction: {
-        ratio: number;
-        spec: {
-            protein: number;
-            WG: number;
-            ash: number;
-            loss: number;
-            salt: number;
-            sugar: number;
-            water: number;
-        }
+    fractions: {
+        [fractionName: string] :{
+            ratio: number;
+            spec: {
+                protein: number;
+                WG: number;
+                ash: number;
+                loss: number;
+                salt: number;
+                sugar: number;
+                water: number;
+            };
+        };
     }[];
 }

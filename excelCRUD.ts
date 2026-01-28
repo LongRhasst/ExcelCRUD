@@ -84,17 +84,21 @@ class ExcelProcessor {
         
         const paddyData: OutputDataRead = {
             name: paddyName?.toString() || "",
-            fraction: []
+            fractions: []
         };
         
-        for (let fractionIndex: number = 0; fractionIndex <= 3; fractionIndex++){
+        for (let fractionIndex: number = 0; fractionIndex < 3; fractionIndex++){
             const baseRow = paddyIndex + fractionIndex;
-            const ratioCell = worksheet.getCell(`F${baseRow}`).value;
-            const ratio = typeof ratioCell === 'number' ? ratioCell : parseFloat(ratioCell?.toString() || "0");
+            // const ratioCell = worksheet.getCell(`E${baseRow}`).value;
+            // const ratio = typeof ratioCell === 'number' ? ratioCell : parseFloat(ratioCell?.toString() || "0");
+            
+            const fractionName = worksheet.getCell(`F${baseRow}`).value?.toString() || `Fraction ${fractionIndex + 1}`;
             
             const fractionData: any = {
-                ratio: ratio,
-                spec: {}
+                [fractionName]: {
+                    ratio: null,
+                    spec: {}
+                }
             };
             
             for (let col = 'G'; col <= 'M'; col = String.fromCharCode(col.charCodeAt(0) + 1)) {
@@ -105,11 +109,11 @@ class ExcelProcessor {
                 const fractionValue = typeof cellValue === 'number' ? cellValue : parseFloat(cellValue?.toString() || "0");
                 
                 if(titleValue){
-                    fractionData.spec[titleValue] = fractionValue;
+                    fractionData[fractionName].spec[titleValue] = fractionValue;
                 }
             }
             
-            paddyData.fraction.push(fractionData);
+            paddyData.fractions.push(fractionData);
         }
         
         output.push(paddyData);
