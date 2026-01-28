@@ -1,5 +1,5 @@
 import Excel from "exceljs";
-import { InputDataWrite, InputDataRead } from "./interface";
+import { InputDataWrite, InputDataRead, OutputDataRead } from "./interface";
 
 /**
  * Class for processing Excel files: reading and writing data.
@@ -18,7 +18,9 @@ class ExcelProcessor {
     const worksheet = workbook.getWorksheet(Input.SheetName || "Sheet1");
 
     if (!worksheet) {
-      console.error(`Sheet "${Input.SheetName}" not found in file: ${Input.filePath}`);
+      console.error(
+        `Sheet "${Input.SheetName}" not found in file: ${Input.filePath}`,
+      );
       return null;
     }
 
@@ -53,39 +55,69 @@ class ExcelProcessor {
     return null;
   };
 
-  public readFromExcel = async (Input: InputDataRead): Promise<null> => {
+  public readFromExcel = async (Input: InputDataRead): Promise<null | OutputDataRead[]> => {
     const workbook = new Excel.Workbook();
 
     // Load existing Excel file
     await workbook.xlsx.readFile(Input.filePath);
 
+    let output : OutputDataRead[] = [];
+
     // Get the specified worksheet
     const worksheet = workbook.getWorksheet(Input.SheetName || "Sheet1");
 
     if (!worksheet) {
-      console.error(`Sheet "${Input.SheetName}" not found in file: ${Input.filePath}`);
       return null;
     }
 
-    console.log(`Reading from file: ${Input.filePath}`);
-    console.log(`Sheet: ${Input.SheetName || "Sheet1"}`);
+    if(worksheet.getCell(`A3`).value !== "NL"){
+        return null;
+    }
+    
+    for(let paddyIndex: number = 6;;paddyIndex+=3){
+        const cellAddress = `A${paddyIndex}`;
+        const paddyName = worksheet.getCell(cellAddress).value;
+        
+        if(paddyName === null){
+            break;
+        }
+        
+        const paddyData: OutputDataRead = {
+            name: paddyName?.toString() || "",
+            fraction: []
+        };
+        
+        for (let fractionIndex: number = 0; fractionIndex <= 3; fractionIndex++){
+            const baseRow = paddyIndex + fractionIndex;
+            const ratioCell = worksheet.getCell(`F${baseRow}`).value;
+            const ratio = typeof ratioCell === 'number' ? ratioCell : parseFloat(ratioCell?.toString() || "0");
+            
+            const fractionData: any = {
+                ratio: ratio,
+                spec: {}
+            };
+            
+            for (let col = 'G'; col <= 'M'; col = String.fromCharCode(col.charCodeAt(0) + 1)) {
+                const fractionCellAddressTitle = `${col}4`;
+                const fractionCellAddress = `${col}${baseRow}`;
+                const titleValue = worksheet.getCell(fractionCellAddressTitle).value?.toString() || "";
+                const cellValue = worksheet.getCell(fractionCellAddress).value;
+                const fractionValue = typeof cellValue === 'number' ? cellValue : parseFloat(cellValue?.toString() || "0");
+                
+                if(titleValue){
+                    fractionData.spec[titleValue] = fractionValue;
+                }
+            }
+            
+            paddyData.fraction.push(fractionData);
+        }
+        
+        output.push(paddyData);
+    }
 
-    // Get column and row identifiers
-    const columnId = Input.columnIds;
-    const rowId = Input.rowIds;
-
-    // Build cell address (e.g., "K6")
-    const cellAddress = `${columnId}${rowId}`;
-    console.log(`Cell address: ${cellAddress}`);
-
-    // Read cell value
-    const cell = worksheet.getCell(cellAddress);
-    const cellValue = cell.value;
-
-    console.log(`Cell value at ${cellAddress}:`, cellValue);
-    console.log(`Cell type:`, cell.type);
-
-    return null;
+    console.log(JSON.stringify(output, null, 2));
+    
+    return output;
   };
 }
 

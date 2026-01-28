@@ -21,13 +21,13 @@ const mainFunction = async (): Promise<null> => {
 
     const dataRead: InputDataRead = {
         filePath: "MỚI.xlsx",
-        columnIds: "B",
-        rowIds: "3",
+        columnIds: "A",
+        rowIds: "7",
         SheetName: "Sheet1",
     };
 
-    await excelProcess.writeToExcel(dataWrite);
-    // await excelProcess.readFromExcel(dataRead);
+    // await excelProcess.writeToExcel(dataWrite);
+    await excelProcess.readFromExcel(dataRead);
     return null;
 }
 
