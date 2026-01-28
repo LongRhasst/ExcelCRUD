@@ -21,8 +21,6 @@ const mainFunction = async (): Promise<null> => {
 
     const dataRead: InputDataRead = {
         filePath: "MỚI.xlsx",
-        columnIds: "A",
-        rowIds: "7",
         SheetName: "Sheet1",
     };
 

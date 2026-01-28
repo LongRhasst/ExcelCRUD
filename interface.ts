@@ -16,8 +16,6 @@ interface inputProduct{
 
 export interface InputDataRead {
     filePath: string | "MỚI.xlsx";
-    columnIds: string;
-    rowIds: string;
     SheetName: string;
 }
 
